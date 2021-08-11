@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Home/Search Page</title>
+	<link rel="StyleSheet" type="text/css" href="Home.css"/>
+	<script src="https://kit.fontawesome.com/dc1e68890d.js" crossorigin="anonymous"></script>
+	<script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+	<meta name="google-signin-client_id" content="1078765046629-u9m47t30dg6hveg72rbof5l6rgtvg8nq.apps.googleusercontent.com">
+</head>
+<body>
+	<div class="header" id="userheader">
+	  	<a href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/home.html" class="logo">SalStocks</a>
+	  	<div class="header-right">
+	    <a class="active" href="home.html">Home/Search</a>
+	    <a href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/favorites.html" id=favorites></a>
+	    <a href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/portfolio.html" id=portfolio></a>
+	    <a id="logout" onClick = "return logout()" href = "http://localhost:8080/mtwilson_CSCI201L_Assignment4/login.html"></a> 
+	    <a href="login.html" id="loginsign">Login/Signup</a>
+	  </div>
+	</div> <br/> <br/> <br/>
+	<div id="default">
+		<h1 class="title">STOCK SEARCH</h1>
+		<div class="wrap">
+		   <div class="search">
+		      <input id = "searchbox" type="text" name="searchword" class="searchTerm" placeholder="Enter stock ticker?">
+		      <button type="submit" class="searchButton" onClick = "apiCall()">
+		        <i class="fas fa-search"></i>
+		     </button>
+		     <h2 id="searchresult"></h2>
+	   	</div>
+   	</div>
+</div>
+<script>
+		var json;
+		var getticker;
+		var x = null;
+		x = document.cookie;
+		if(x === ""){
+			console.log("null");
+		}
+		else{
+			console.log(x);
+			console.log("right here")
+			document.getElementById('portfolio').innerHTML="Portfolio";
+			document.getElementById('logout').innerHTML="Logout";
+			document.getElementById('favorites').innerHTML="Favorites";
+			document.getElementById('loginsign').style.display="none";
+		}
+		function icon(){
+			var filled = "<i class='fas fa-star'></i>";
+			document.getElementById('stars').innerHTML = filled;
+			console.log(getticker[0]);
+			alert(getticker[0] + " successfully added to favorites!");
+			fetch('favoritesServlet?ticker=' + getticker[0])
+			.then(response => response.json())
+			.then(data => {
+				console.log(data);
+			})
+		}
+		function onLoad() {
+	      gapi.load('auth2', function() {
+	        gapi.auth2.init();
+	      });
+	    }
+		function logout(){
+			console.log("in logout");
+			document.location.href = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=http://www.example.com";
+			var auth2 = gapi.auth2.getAuthInstance();
+		    auth2.disconnect().then(function () {
+		      console.log('User signed out.');
+		    });
+		    
+			fetch('logoutServlet')
+			.then(response => response.text())
+			.then(data => {
+				console.log(data);
+			})
+			
+		}
+		function buyStock(data){
+			var quantity = document.getElementById('buyinput').value
+			var ask = json.askPrice[0];
+			if(ask === null){
+				alert("Cannot trade when the market is closed");
+			}
+			else{
+				if(ask === 0){
+					ask = json.newlast[0];
+				}
+				fetch('homeBuyServlet?quantity='+quantity +'&ticker='+json.ticker+ '&ask='+ask)
+				.then(response => response.text())
+				.then(data => {
+					alert(data);
+				})
+			}
+			
+		}
+		async function apiCall(){
+			var dom =  document.getElementById('searchbox').value;
+			fetch('searchServlet?searchword=' + dom)
+			.then(response => response.json())
+			.then(data => {
+				console.log(data);
+				if(data.error != "false"){
+					alert(data.error);
+				}
+				else{
+					json = data;
+					var line = "<hr style= 'size:8; width:90%; color:red;'>" 
+					var name = "<h2 style='text-align:center;'>"+data.name+"</h2>";
+					var ticker = "<h1 style='text-align:center;'>"+data.ticker+"</h1>";
+					var exchangeCode = "<h4 style='text-align:center;'>"+data.exchangeCode+"</h4>";
+					var high = data.high[0];
+					high = (high).toFixed(2);
+					var low = data.low[0];
+					low = low.toFixed(2);
+					var open = data.open[0];
+					open = open.toFixed(2);
+					var close = data.close[0];
+					close = close.toFixed(2);
+					var prices = "<ul style='text-align:center; list-style-type:none; padding-left:0'><li>High Price: "+high+"</li>"+"<li>Low Price: "+low+"</li>"+"<li>Open Price: "+open+"</li>"+"<li>Close: "+close+"</li>"+"<li>Volume: "+data.newvolume+"</li></ul>";
+					var date = "<p style='text-align:left;'>Start Date: " + data.startDate + "</p>";
+					var description = "<p>" + data.description + "</p>";
+					if(x === ""){
+						document.getElementById('default').innerHTML = ticker + name + exchangeCode + prices + date + description;
+						//document.getElementById('default').style = 'margin: auto; width:50%';
+					}
+					else{
+						var today = new Date();
+						var mm = String(today.getMonth() + 1).padStart(2, '0'); 
+						var dd = String(today.getDate()).padStart(2, '0');
+						
+						var objToday = new Date(),
+						curYear = objToday.getFullYear(),
+						curHour = objToday.getHours() > 12 ? objToday.getHours() - 12 : (objToday.getHours() < 10 ? "0" + objToday.getHours() : objToday.getHours()),
+						curMinute = objToday.getMinutes() < 10 ? "0" + objToday.getMinutes() : objToday.getMinutes(),
+						curSeconds = objToday.getSeconds() < 10 ? "0" + objToday.getSeconds() : objToday.getSeconds();
+						var todays = curYear + "-" + mm + "-" + dd + " "+ curHour + ":" + curMinute + ":" + curSeconds;
+	
+						getticker = data.newticker;
+						var change = (parseFloat(data.newlast[0])) - (parseFloat(data.prevClose));
+						change = (change).toFixed(2);
+						var changePercent = (change * 100) / parseFloat(data.prevClose[0]);
+						changePercent = changePercent.toFixed(2);
+						newticker = "<p style='text-align:left;display:inline-block; width:49%; font-size: 2em; font-weight: bolder;'>"+data.newticker+ "<span id='stars'><i id='star' class='far fa-star' onClick='icon()'></i></span></p>";
+						var name = "<p style='text-align:left; display:inline-block; width:49%; font-size: 1.5em;'>"+data.name+"</p>";
+						if(changePercent < 0){
+							var displayChange = "<p style='text-align:right; color:red; display:inline-block; width:50%; font-size: 1.5em;'><i class='fas fa-caret-down'></i>  "+change + " ("+changePercent+")%"+"</p>";
+							var lastPrice = "<p style='text-align: right; color:red; width:50%;  display: inline-block; font-size: 2em; font-weight: bolder;'>"+data.tngoLast+"</p>";
+						}
+						else{
+							var displayChange = "<p style='text-align:right; color:green; display:inline-block; width:50%; font-size: 1.5em;'><i class='fas fa-caret-up'></i>  "+change + " ("+changePercent+")%"+"</p>";
+							var lastPrice = "<p style='text-align: right; color:green; width:50%;  display: inline-block; font-size: 2em; font-weight: bolder;'>"+data.tngoLast+"</p>";
+	
+						}
+						var exchangeCode = "<p style='text-align:left; display:inline-block; width:49%;'>"+data.exchangeCode+"</p>";
+						var mid;
+						if(data.mid[0] === null){
+							mid = "-";
+						}
+						else{
+							mid = data.mid[0];
+						}
+						var timestamp = "<p style='text-align:right; display:inline-block; width:50%;'>"+todays+"</p>"
+						var label = "<label>Quantity: </label>";
+						var input = "<input type='text' id='buyinput'></input>";
+						var buy="<input type='submit' value='Buy' onClick ='buyStock()'></input>";
+						var prices = "<ul style='text-align:left; display:inline-block; width:49%; list-style-type:none; padding-left:0'><li>High Price: "+data.high+"</li>"+"<li>Low Price: "+data.low+"</li>"+"<li>Open Price: "+data.open+"</li>"+"<li>Close: "+data.close+"</li>"+"<li>Volume: "+data.volume+"</li></ul>";
+						var dailyPrices = "<ul style='text-align:right; display:inline-block; width:50%; list-style-type:none; padding-left:0'><li>Mid Price: "+mid+"</li>"+"<li>Ask Price: "+data.askPrice+"</li>"+"<li>Ask Size: "+data.askSize+"</li>"+"<li>Bid Price: "+data.bidPrice+"</li>"+"<li>Bid Size: "+data.bidSize+"</li></ul>";
+						if(data.askPrice[0] === null){
+							document.getElementById('default').innerHTML = newticker + lastPrice+ name + displayChange + exchangeCode+ timestamp+ label + input + buy + "<p style='text-align:center'><span style='background-color:#F08080;'>Market is closed</span></p><p style='text-align:center;'>Summary</p>"+ line+ prices + description;
+						}
+						else{
+							document.getElementById('default').innerHTML = newticker + lastPrice+ name + displayChange + exchangeCode+ timestamp+ label + input + buy + "<p style='text-align:center'><span style='background-color:#90EE90;'>Market is open</span></p>" + "<p style='text-align:center;'>Summary</p>"+ line+ prices + dailyPrices+ "<h5 style='text-align:center'>Company's Description</h5>"+ date+  description;
+						}
+					}
+				}
+			})
+		};		
+	</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Login Page and Sign Up</title>
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta name="google-signin-client_id" content="1078765046629-u9m47t30dg6hveg72rbof5l6rgtvg8nq.apps.googleusercontent.com">
+		<link rel="StyleSheet" type="text/css" href="login.css"/>
+		<script src="https://kit.fontawesome.com/dc1e68890d.js" crossorigin="anonymous"></script>
+	</head>
+	<body>
+	<script>
+		x = document.cookie;
+		if(x === ""){
+			console.log("null");
+		}
+		else{
+			console.log(x);
+		}
+		
+		function onSignIn(googleUser) {
+			  var profile = googleUser.getBasicProfile();
+			  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+			  console.log('Name: ' + profile.getName());
+			  console.log('Image URL: ' + profile.getImageUrl());
+			  console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+			  fetch('registerServlet?google=true&username='+profile.getName()+'&email='+profile.getEmail())
+			  .then(response => response.text())
+			  .then(data => {
+				  console.log(data)
+			  })
+			  window.location.href = "http://localhost:8080/mtwilson_CSCI201L_Assignment4/home.html";
+
+			}
+		function registerFunction(){
+			
+			if (document.getElementById('password').value ===document.getElementById('cpassword').value) {
+			    document.getElementById('message').style.color = 'green';
+			    document.getElementById('message').innerHTML = 'password and confirmed password match';
+			  } else {
+			    document.getElementById('message').style.color = 'red';
+			    document.getElementById('message').innerHTML = 'password and confirmed password need to match';
+			  }
+			/*
+			var email = document.getElementById("email").value;
+			var username = document.getElementById("username").value;
+			var password = document.getElementById("password").value;
+			var cpassword = document.getElementById("cpassword").value;
+			if(password != cpassword){
+				alert("password and cpassword need to match");
+			}
+			
+			fetch('registerServlet?email=' + email +'&username=' + username + '&password=' +password)
+			.then(response => response.text())
+			.then(data => {
+				console.log(data);
+				if(data === "success"){
+					alert(data);
+					//window.location.href = "http://localhost:8080/mtwilson_CSCI201L_Assignment4/home.html";
+				}
+				else{
+					alert(data);
+				}
+			})
+			*/
+		}
+	</script>
+	<div class="header" id="userheader">
+	  	<a href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/home.html" class="logo">SalStocks</a>
+	  	<div class="header-right">
+	    <a href="home.html">Home/Search</a>
+	    <a href="login.html" id="loginsign" class="active">Login/Signup</a>
+	  </div>
+	</div> <br/> <br/> <br/>
+		<div style='text-align:center; display:flex; width:60%; margin:auto'>
+		<div id='login' style='flex-grow:1; text-align:left'>
+		<h1>Login</h1>
+		<form action="loginServlet" method="GET">
+			Username <br/><input type="text" name="username" required><br/>
+			Password <br/><input type="text" name="password" required><br/>
+			<br/><input type="submit" value="Sign In" name="signin"></input><br />
+			<div class="g-signin2" data-onsuccess="onSignIn"></div>
+		</form>
+		</div>
+		<div id ='signin' style='flex-grow:1; text-align:right;'>
+		<h1>Sign Up</h1>
+		<form action='registerServlet' method="GET">
+			Email <br/><input id="email" type="text" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" style='text-align:left' required><br/><br/>
+			Username <br/><input id="username"type="text" name="username" style='text-align:left' required><br/><br/>
+			Password <br/><input id="password"type="text" onkeyup="registerFunction()" name="password" style='text-align:left' required><br/><br/>
+			Confirm Password <br/><input id="cpassword" onkeyup="registerFunction()" type="text" name="cpassword" style='text-align:left' required><br/><br/>
+			<span id='message'></span>
+			<br/><input type="submit" value="Sign Up" name="signup" ></input>
+		</form>
+		</div>
+		</div>
+	</body>
+</html>

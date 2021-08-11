@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Portfolio Page</title>
+		<script src="https://kit.fontawesome.com/dc1e68890d.js" crossorigin="anonymous"></script>
+		<script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+		<meta name="google-signin-client_id" content="1078765046629-u9m47t30dg6hveg72rbof5l6rgtvg8nq.apps.googleusercontent.com">
+		<link rel="StyleSheet" type="text/css" href="portfolio.css"/>
+		<script>
+		var info = null;
+			console.log("at portfolio");
+			fetch('getPortfolio')
+			.then(response => response.json())
+			.then(data => {
+				info = data;
+				console.log(data);
+				var cashBal = data[data.length-1].balance[0];
+				var totalMarket = 0;
+				cashBal = cashBal.toFixed(2);
+				document.getElementById('balance').innerHTML = 'Cash Balance: ' + cashBal;
+				var i;
+				for(i = 0; i < data.length-1; i++){
+					var last = data[i].last[0];
+					last = last.toFixed(2);
+					var name = data[i].name[0];
+					var ticker = data[i].ticker[0];
+					var quantity = data[i].quantity[0];
+					var prev = data[i].prevClose[0];
+					var totalCost = data[i].totalCost[0];
+					totalCost = totalCost.toFixed(2);
+					var avg = totalCost/quantity;
+					avg = avg.toFixed(2);
+					var change = last - avg;
+					change = change.toFixed(2);
+					var market = last * quantity;
+					console.log(market);
+					market = market.toFixed(2);
+					totalMarket+=+market;
+					if(change > 0){
+						var div = "<div style='width: 50%; margin:auto; border-radius:0px; border: 1px solid;' id='"+ticker+"' value='"+ticker+"'><div style='border-bottom: 1px solid; padding-left:30px; background:#F0F0F0;'><p>"+ticker + " " + name + "</p></div><br><div style='vertical-align:top; float:left'><ul style='display:inline-block; *display: inline; width:90%; list-style-type:none;'><li id='quant"+ticker+"'>Quantity: "+ quantity+"</li><li>Avg Cost/Share: "+avg+"</li><li>Total Cost: "+ totalCost+"</li></ul></div><div style='vertical-align:top; float:right; margin-right:20px;'><ul style='text-align:right; display:inline-block; *display: inline; width:80%; list-style-type:none;'><li style='color:green;'><i class='fas fa-caret-up'></i>  Change: " + change+"</li><li>Current Price: "+last+"</li><li>Market Value: " + market + "</li></ul></div><br><div style='clear:both; border-top:1px solid; text-align:center; background:#F0F0F0;'><br><label style='text-align:center;'>Quantity: </label><input type='text' id='buyinput"+ticker+"' style='text-align:center;''></input><br> <input style='text-align:center;' type='radio' id='radiobuy' name='radio' value='radiobuy'><label for='radiobuy'>Buy</label><input type='radio' id='radiosell' name='radio' value='radiosell'><label for='radiosell'>Sell</label><br/><input type='submit' name='submit' value='submit' onClick='radio("+ticker+")' style='text-align:center;'></div></div><br><br>";
+					}
+					else if(change < 0){
+						var div = "<div style='width: 50%; margin:auto; border-radius:0px; border: 1px solid;' id='"+ticker+"' value='"+ticker+"'><div style='border-bottom: 1px solid; padding-left:30px; background:#F0F0F0;'><p>"+ticker + " " + name + "</p></div><br><div style='vertical-align:top; float:left'><ul style='display:inline-block; *display: inline; width:90%; list-style-type:none;'><li id='quant"+ticker+"'>Quantity: "+ quantity+"</li><li>Avg Cost/Share: "+avg+"</li><li>Total Cost: "+ totalCost+"</li></ul></div><div style='vertical-align:top; float:right; margin-right:20px;'><ul style='text-align:right; display:inline-block; *display: inline; width:80%; list-style-type:none;'><li style = 'color:red;'> <i class='fas fa-caret-down'></i>  Change: " + change+"</li><li>Current Price: "+last+"</li><li>Market Value: " + market + "</li></ul></div><br><div style='clear:both; border-top:1px solid; text-align:center; background:#F0F0F0;'><br><label style='text-align:center;'>Quantity: </label><input type='text' id='buyinput"+ticker+"' style='text-align:center;''></input><br> <input style='text-align:center;' type='radio' id='radiobuy' name='radio' value='radiobuy'><label for='radiobuy'>Buy</label><input type='radio' id='radiosell' name='radio' value='radiosell'><label for='radiosell'>Sell</label><br/><input type='submit' name='submit' value='submit' onClick='radio("+ticker+")' style='text-align:center;'></div></div><br><br>";
+
+					}
+					else{
+						var div = "<div style='width: 50%; margin:auto; border-radius:0px; border: 1px solid;' id='"+ticker+"' value='"+ticker+"'><div style='border-bottom: 1px solid; padding-left:30px; background:#F0F0F0;'><p>"+ticker + " " + name + "</p></div><br><div style='vertical-align:top; float:left'><ul style='display:inline-block; *display: inline; width:90%; list-style-type:none;'><li id='quant"+ticker+"'>Quantity: "+ quantity+"</li><li>Avg Cost/Share: "+avg+"</li><li>Total Cost: "+ totalCost+"</li></ul></div><div style='vertical-align:top; float:right; margin-right:20px;'><ul style='text-align:right; display:inline-block; *display: inline; width:80%; list-style-type:none;'><li>Change: " + change+"</li><li>Current Price: "+last+"</li><li>Market Value: " + market + "</li></ul></div><br><div style='clear:both; border-top:1px solid; text-align:center; background:#F0F0F0;'><br><label style='text-align:center;'>Quantity: </label><input type='text' id='buyinput"+ticker+"' style='text-align:center;''></input><br> <input style='text-align:center;' type='radio' id='radiobuy' name='radio' value='radiobuy'><label for='radiobuy'>Buy</label><input type='radio' id='radiosell' name='radio' value='radiosell'><label for='radiosell'>Sell</label><br/><input type='submit' name='submit' value='submit' onClick='radio("+ticker+")' style='text-align:center;'></div></div><br><br>";
+
+					}
+					document.getElementById('allstocks').innerHTML += div;
+				}
+				totalMarket+=+cashBal;
+				totalMarket = totalMarket.toFixed(2);
+				document.getElementById('account').innerHTML = 'Total Account Value: ' + totalMarket;
+			})
+			function radio(t){
+				var totalQuant;
+				var ask;
+				var bid;
+				for(var i = 0; i < info.length; i++){
+					if(t.id === info[i].ticker[0]){
+						totalQuant = info[i].quantity[0];
+						ask = info[i].askPrice[0];
+						bid = info[i].bidPrice[0];
+						if(info[i].askPrice[0] === 0){
+							ask = info[i].last[0];
+						}
+						if(info[i].bidPrice[0] === 0){
+							bid = info[i].last[0];
+						}
+						break;
+					}
+				}
+				if(ask === null){
+					alert("cannot trade during non-market hours");
+				}
+				else{
+					var quantity = document.getElementById('buyinput'+t.id).value;
+					var option = document.querySelector('input[name="radio"]:checked').value;
+					if(quantity === ""){
+						alert("Please enter a quantity");
+					}
+					else if(option === 'radiobuy'){
+						fetch('homeBuyServlet?quantity='+quantity +'&ticker='+t.id+ '&ask='+ask)
+						.then(response => response.text())
+						.then(data => {
+							console.log(data);
+							if(data === "FAILED: Purchase not possible"){
+								alert(data);
+							}
+							else{
+								location.reload();
+								alert(data);
+							}
+						})
+					}
+					else if(option === 'radiosell'){
+						if(quantity > totalQuant){
+							alert("Error: Quantity entered is greater than total amount of owned shares");
+						}
+						else{
+							fetch('sellServlet?quantity='+quantity +'&ticker='+t.id+'&last='+bid)
+							.then(response => response.text())
+							.then(data => {
+								location.reload();
+								alert(data);
+							})
+						}
+						
+					}
+				}
+			}
+			function onLoad() {
+			      gapi.load('auth2', function() {
+			        gapi.auth2.init();
+			      });
+			  }
+			function logout(){
+				console.log("in logout");
+				var auth2 = gapi.auth2.getAuthInstance();
+			    auth2.signOut().then(function () {
+			      console.log('User signed out.');
+			    });
+				fetch('logoutServlet')
+				.then(response => response.text())
+				.then(data => {
+					console.log(data);
+				})
+			}
+		</script>
+	</head>
+	<body>
+	<div class="header" id="userheader">
+		  	<a href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/home.html" class="logo">SalStocks</a>
+		  	<div class="header-right">
+			    <a href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/home.html">Home/Search</a>
+			    <a  href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/favorites.html" id=favorites>Favorites</a>
+			    <a class="active" href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/portfolio.html" id=portfolio>Portfolio</a>
+			    <a onClick = "return logout()" href="http://localhost:8080/mtwilson_CSCI201L_Assignment4/login.html" id="logout">Logout</a>
+	    	</div>
+	  </div>
+	  <h1 style='text-align:center;'>Your Portfolio</h1>
+	  <h3 id="balance"></h3>
+	  <h3 id="account"></h3>
+	  <div id="allstocks">
+	  </div>
+	</body>
+</html>
